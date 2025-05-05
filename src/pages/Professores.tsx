@@ -5,8 +5,8 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import api from "../api/axios"
 import type { Professor } from "../types/interfaces"
-import { ProfessorForm } from "../components/professor/professor-form"
-import { ProfessorList } from "../components/professor/professor-list"
+import { ProfessorDialog } from "../components/professor/Professor-dialog"
+import { ProfessorList } from "../components/professor/Professor-list"
 
 export default function Professores() {
   const [professores, setProfessores] = useState<Professor[]>([])
@@ -54,17 +54,17 @@ export default function Professores() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Cadastro de Professores</h1>
-
-        <div className="grid gap-8 md:grid-cols-[1fr_1fr] lg:grid-cols-[1.2fr_0.8fr]">
-          <ProfessorList professores={professores} />
-          <ProfessorForm
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Cadastro de Professores</h1>
+          <ProfessorDialog
             formData={formData}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
             isLoading={isLoading}
           />
         </div>
+
+        <ProfessorList professores={professores} />
       </div>
     </div>
   )
