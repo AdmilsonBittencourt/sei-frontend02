@@ -63,8 +63,14 @@ export default function Professores() {
     }
   }
 
+  const handleView = (professor: Professor) => {
+    toast({
+      title: "Visualizar Professor",
+      description: `Você está visualizando o professor ${professor.nome}.`,
+    })
+  }
+
   const handleEdit = (professor: Professor) => {
-    // Implementação futura: editar professor
     toast({
       title: "Editar Professor",
       description: `Você selecionou o professor ${professor.nome} para edição.`,
@@ -96,7 +102,7 @@ export default function Professores() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Cadastro de Professores</h1>
           <ProfessorDialog
@@ -107,7 +113,7 @@ export default function Professores() {
           />
         </div>
 
-        <ProfessorList professores={professores} onEdit={handleEdit} onDelete={handleDelete} />
+        <ProfessorList professores={professores} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
     </div>
   )
