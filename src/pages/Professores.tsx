@@ -175,13 +175,31 @@ export default function Professores() {
               if (professor.id) {
                 handleEdit(professor);
               } else {
-                // Corrigindo a submissão do novo professor
+                // Enviando diretamente para a API sem manipulação adicional do estado
                 const newProfessor = {
                   ...professor,
                   ativo: true
                 };
-                setFormData(newProfessor);
-                handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+                setIsLoading(true);
+                api.post("/professores", newProfessor)
+                  .then(() => {
+                    fetchProfessores();
+                    toast({
+                      title: "Sucesso",
+                      description: "Professor cadastrado com sucesso!",
+                    });
+                  })
+                  .catch((error) => {
+                    console.error("Erro ao cadastrar professor:", error);
+                    toast({
+                      title: "Erro",
+                      description: "Não foi possível cadastrar o professor.",
+                      variant: "destructive",
+                    });
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
               }
             }}
             isLoading={isLoading}
