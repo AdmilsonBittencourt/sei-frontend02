@@ -10,13 +10,15 @@ import { ProfessorList } from "../components/professor/Professor-list"
 import { useToast } from "@/hooks/use-toast"
 
 export default function Professores() {
-  const [professores, setProfessores] = useState<Professor[]>([])
+  const [professoresAtivos, setProfessoresAtivos] = useState<Professor[]>([])
+  const [professoresInativos, setProfessoresInativos] = useState<Professor[]>([])
   const [formData, setFormData] = useState<Professor>({
     nome: "",
     email: "",
     telefone: "",
     CPF: "",
     departamento: "",
+    ativo: true  // Adicionando o campo ativo com valor padrão true
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -24,14 +26,23 @@ export default function Professores() {
   const fetchProfessores = async () => {
     try {
       const res = await api.get("/professores")
-      // Ordenar os professores por ID para manter a ordem original
-      const professoresOrdenados = res.data.sort((a: Professor, b: Professor) => {
+      const professores = res.data.sort((a: Professor, b: Professor) => {
         if (a.id && b.id) {
           return Number(a.id) - Number(b.id)
         }
         return 0
       })
-      setProfessores(professoresOrdenados)
+      
+      // Modificando a lógica de filtro para ser mais flexível
+      const ativos = professores.filter((prof: Professor) => prof.ativo)
+      const inativos = professores.filter((prof: Professor) => !prof.ativo)
+      
+      console.log('Professores recebidos:', professores)
+      console.log('Ativos:', ativos)
+      console.log('Inativos:', inativos)
+      
+      setProfessoresAtivos(ativos)
+      setProfessoresInativos(inativos)
     } catch (error) {
       console.error("Erro ao buscar professores:", error)
       toast({
@@ -48,11 +59,26 @@ export default function Professores() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validação dos campos obrigatórios
+    if (!formData.nome || !formData.email || !formData.CPF) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      })
+      return
+    }
+    
     setIsLoading(true)
 
     try {
-      await api.post("/professores", formData)
-      setFormData({ nome: "", email: "", telefone: "", CPF: "", departamento: "" })
+      const professorData = {
+        ...formData,
+        ativo: true // Garantindo que o campo ativo seja enviado
+      };
+      await api.post("/professores", professorData)
+      setFormData({ nome: "", email: "", telefone: "", CPF: "", departamento: "", ativo: true })
       fetchProfessores()
       toast({
         title: "Sucesso",
@@ -108,11 +134,13 @@ export default function Professores() {
     }
 
     try {
-      setIsLoading(true) // Adiciona loading state
+      setIsLoading(true)
       const response = await api.patch(`/professores/${id}/desativar`)
       
       if (response.status === 200 || response.status === 204) {
-        fetchProfessores()
+        // Apenas busca os dados atualizados do backend
+        await fetchProfessores()
+        
         toast({
           title: "Sucesso",
           description: "Professor desativado com sucesso!",
@@ -128,7 +156,7 @@ export default function Professores() {
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false) // Remove loading state
+      setIsLoading(false)
     }
   }
 
@@ -147,19 +175,43 @@ export default function Professores() {
               if (professor.id) {
                 handleEdit(professor);
               } else {
-                handleSubmit(new Event('submit') as unknown as React.FormEvent);
+                // Corrigindo a submissão do novo professor
+                const newProfessor = {
+                  ...professor,
+                  ativo: true
+                };
+                setFormData(newProfessor);
+                handleSubmit({ preventDefault: () => {} } as React.FormEvent);
               }
             }}
             isLoading={isLoading}
           />
         </div>
 
-        <ProfessorList 
-          professores={professores} 
-          onView={handleView} 
-          onEdit={handleEdit} 
-          onDelete={handleDelete} 
-        />
+        <div className="space-y-8">
+          {/* Lista de Professores Ativos */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Professores Ativos</h2>
+            <ProfessorList 
+              professores={professoresAtivos} 
+              onView={handleView} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete} 
+            />
+          </div>
+
+          {/* Lista de Professores Inativos */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Professores Inativos</h2>
+            <ProfessorList 
+              professores={professoresInativos} 
+              onView={handleView} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete}
+              isInactive
+            />
+          </div>
+        </div>
       </div>
     </div>
   )

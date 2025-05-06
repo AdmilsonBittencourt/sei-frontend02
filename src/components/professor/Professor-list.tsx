@@ -14,9 +14,10 @@ interface ProfessorListProps {
   onEdit?: (professor: Professor) => void
   onDelete?: (id: string | number | undefined) => void
   onView?: (professor: Professor) => void
+  isInactive?: boolean
 }
 
-export function ProfessorList({ professores, onEdit, onDelete, onView }: ProfessorListProps) {
+export function ProfessorList({ professores, onEdit, onDelete, onView, isInactive }: ProfessorListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
@@ -49,7 +50,7 @@ export function ProfessorList({ professores, onEdit, onDelete, onView }: Profess
   }
 
   return (
-    <Card className="shadow-md">
+    <Card className={`shadow-md ${isInactive ? 'opacity-75' : ''}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -95,7 +96,7 @@ export function ProfessorList({ professores, onEdit, onDelete, onView }: Profess
                 </TableHeader>
                 <TableBody>
                   {currentItems.map((professor, index) => (
-                    <TableRow key={professor.id}>
+                    <TableRow key={professor.id} className={isInactive ? 'bg-gray-50' : ''}>
                       <TableCell className="font-medium">{indexOfFirstItem + index + 1}</TableCell>
                       <TableCell>{professor.nome}</TableCell>
                       <TableCell>{professor.email}</TableCell>
