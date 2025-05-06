@@ -8,6 +8,7 @@ import type { Professor } from "../types/interfaces"
 import { ProfessorDialog } from "../components/professor/Professor-dialog"
 import { ProfessorList } from "../components/professor/Professor-list"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 
 export default function Professores() {
   const [professoresAtivos, setProfessoresAtivos] = useState<Professor[]>([])
@@ -21,6 +22,7 @@ export default function Professores() {
     ativo: true  // Adicionando o campo ativo com valor padrão true
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [showInactive, setShowInactive] = useState(false)
   const { toast } = useToast()
 
   const fetchProfessores = async () => {
@@ -33,7 +35,7 @@ export default function Professores() {
         return 0
       })
       
-      // Modificando a lógica de filtro para ser mais flexível
+      // Corrigindo a lógica de filtro
       const ativos = professores.filter((prof: Professor) => prof.ativo)
       const inativos = professores.filter((prof: Professor) => !prof.ativo)
       
@@ -207,26 +209,25 @@ export default function Professores() {
         </div>
 
         <div className="space-y-8">
-          {/* Lista de Professores Ativos */}
+          {/* Lista de Professores */}
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Professores Ativos</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold">
+                {showInactive ? "Professores Inativos" : "Professores Ativos"}
+              </h2>
+              <Button
+                variant="outline"
+                onClick={() => setShowInactive(!showInactive)}
+              >
+                {showInactive ? "Ver Professores Ativos" : "Ver Professores Inativos"}
+              </Button>
+            </div>
             <ProfessorList 
-              professores={professoresAtivos} 
-              onView={handleView} 
-              onEdit={handleEdit} 
-              onDelete={handleDelete} 
-            />
-          </div>
-
-          {/* Lista de Professores Inativos */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Professores Inativos</h2>
-            <ProfessorList 
-              professores={professoresInativos} 
+              professores={showInactive ? professoresInativos : professoresAtivos} 
               onView={handleView} 
               onEdit={handleEdit} 
               onDelete={handleDelete}
-              isInactive
+              isInactive={showInactive}
             />
           </div>
         </div>
