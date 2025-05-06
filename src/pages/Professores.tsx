@@ -162,6 +162,41 @@ export default function Professores() {
     }
   }
 
+  const handleReactivate = async (id: string | number | undefined) => {
+    if (!id) return
+
+    // Confirmação antes de reativar
+    if (!window.confirm("Tem certeza que deseja reativar este professor?")) {
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const response = await api.patch(`/professores/${id}/reativar`)
+      
+      if (response.status === 200 || response.status === 204) {
+        // Atualiza a lista de professores
+        await fetchProfessores()
+        
+        toast({
+          title: "Sucesso",
+          description: "Professor reativado com sucesso!",
+        })
+      } else {
+        throw new Error("Erro ao reativar professor")
+      }
+    } catch (error: any) {
+      console.error("Erro ao reativar professor:", error)
+      toast({
+        title: "Erro",
+        description: error.response?.data?.message || "Não foi possível reativar o professor.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchProfessores()
   }, [])
@@ -226,7 +261,7 @@ export default function Professores() {
               professores={showInactive ? professoresInativos : professoresAtivos} 
               onView={handleView} 
               onEdit={handleEdit} 
-              onDelete={handleDelete}
+              onDelete={showInactive ? handleReactivate : handleDelete}
               isInactive={showInactive}
             />
           </div>

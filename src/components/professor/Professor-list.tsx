@@ -3,7 +3,7 @@
 import { useState } from "react"
 import type { Professor } from "../../types/interfaces"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Search, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, Search, Pencil, Trash2, ChevronLeft, ChevronRight, RotateCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -105,31 +105,47 @@ export function ProfessorList({ professores, onEdit, onDelete, onView, isInactiv
                       <TableCell>{professor.departamento}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <ProfessorDialog
-                            formData={professor}
-                            handleSubmit={(updatedProfessor) => onEdit && onEdit(updatedProfessor)}
-                            isLoading={false}
-                            mode="edit"
-                            trigger={
+                          {isInactive ? (
+                            // Botões para professores inativos
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-green-600"
+                              onClick={() => onDelete && onDelete(professor.id)}
+                            >
+                              <span className="sr-only">Reativar</span>
+                              <RotateCw className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            // Botões para professores ativos
+                            <>
+                              <ProfessorDialog
+                                formData={professor}
+                                handleSubmit={(updatedProfessor) => onEdit && onEdit(updatedProfessor)}
+                                isLoading={false}
+                                mode="edit"
+                                trigger={
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-amber-600"
+                                  >
+                                    <span className="sr-only">Editar</span>
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-amber-600"
+                                className="h-8 w-8 p-0 text-red-600"
+                                onClick={() => onDelete && onDelete(professor.id)}
                               >
-                                <span className="sr-only">Editar</span>
-                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Excluir</span>
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            }
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-600"
-                            onClick={() => onDelete && onDelete(professor.id)}
-                          >
-                            <span className="sr-only">Excluir</span>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
