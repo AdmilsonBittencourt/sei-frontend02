@@ -24,7 +24,14 @@ export default function Professores() {
   const fetchProfessores = async () => {
     try {
       const res = await api.get("/professores")
-      setProfessores(res.data)
+      // Ordenar os professores por ID para manter a ordem original
+      const professoresOrdenados = res.data.sort((a: Professor, b: Professor) => {
+        if (a.id && b.id) {
+          return Number(a.id) - Number(b.id)
+        }
+        return 0
+      })
+      setProfessores(professoresOrdenados)
     } catch (error) {
       console.error("Erro ao buscar professores:", error)
       toast({
@@ -70,29 +77,58 @@ export default function Professores() {
     })
   }
 
-  const handleEdit = (professor: Professor) => {
-    toast({
-      title: "Editar Professor",
-      description: `Você selecionou o professor ${professor.nome} para edição.`,
-    })
+  const handleEdit = async (professor: Professor) => {
+    setIsLoading(true)
+  
+    try {
+      await api.put(`/professores/${professor.id}`, professor)
+      fetchProfessores()
+      toast({
+        title: "Sucesso",
+        description: `Professor ${professor.nome} atualizado com sucesso!`,
+      })
+    } catch (error) {
+      console.error("Erro ao editar professor:", error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar os dados do professor.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return
 
+    // Confirmação antes de excluir
+    if (!window.confirm("Tem certeza que deseja desativar este professor?")) {
+      return
+    }
+
     try {
-      // Implementação futura: excluir professor
-      toast({
-        title: "Excluir Professor",
-        description: `Você selecionou o professor ID: ${id} para exclusão.`,
-      })
-    } catch (error) {
-      console.error("Erro ao excluir professor:", error)
+      setIsLoading(true) // Adiciona loading state
+      const response = await api.patch(`/professores/${id}/desativar`)
+      
+      if (response.status === 200 || response.status === 204) {
+        fetchProfessores()
+        toast({
+          title: "Sucesso",
+          description: "Professor desativado com sucesso!",
+        })
+      } else {
+        throw new Error("Erro ao desativar professor")
+      }
+    } catch (error: any) {
+      console.error("Erro ao desativar professor:", error)
       toast({
         title: "Erro",
-        description: "Não foi possível excluir o professor.",
+        description: error.response?.data?.message || "Não foi possível desativar o professor.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false) // Remove loading state
     }
   }
 
@@ -107,13 +143,23 @@ export default function Professores() {
           <h1 className="text-3xl font-bold">Cadastro de Professores</h1>
           <ProfessorDialog
             formData={formData}
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
+            handleSubmit={(professor: Professor) => {
+              if (professor.id) {
+                handleEdit(professor);
+              } else {
+                handleSubmit(new Event('submit') as unknown as React.FormEvent);
+              }
+            }}
             isLoading={isLoading}
           />
         </div>
 
-        <ProfessorList professores={professores} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+        <ProfessorList 
+          professores={professores} 
+          onView={handleView} 
+          onEdit={handleEdit} 
+          onDelete={handleDelete} 
+        />
       </div>
     </div>
   )

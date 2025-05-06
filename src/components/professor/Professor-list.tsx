@@ -3,10 +3,11 @@
 import { useState } from "react"
 import type { Professor } from "../../types/interfaces"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, Search, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ProfessorDialog } from "../../components/professor/Professor-dialog"
 
 interface ProfessorListProps {
   professores: Professor[]
@@ -20,7 +21,7 @@ export function ProfessorList({ professores, onEdit, onDelete, onView }: Profess
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // Filtra os professores com base no termo de busca
+  // Remova a função handleChange que estava lançando erro
   const filteredProfessores = professores.filter((professor) => {
     const searchLower = searchTerm.toLowerCase()
     return (
@@ -103,24 +104,22 @@ export function ProfessorList({ professores, onEdit, onDelete, onView }: Profess
                       <TableCell>{professor.departamento}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-green-600"
-                            onClick={() => onView && onView(professor)}
-                          >
-                            <span className="sr-only">Visualizar</span>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-amber-600"
-                            onClick={() => onEdit && onEdit(professor)}
-                          >
-                            <span className="sr-only">Editar</span>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
+                          <ProfessorDialog
+                            formData={professor}
+                            handleSubmit={(updatedProfessor) => onEdit && onEdit(updatedProfessor)}
+                            isLoading={false}
+                            mode="edit"
+                            trigger={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-amber-600"
+                              >
+                                <span className="sr-only">Editar</span>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
                           <Button
                             variant="outline"
                             size="sm"

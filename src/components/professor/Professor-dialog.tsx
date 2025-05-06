@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Professor } from "../../types/interfaces"
 import { Button } from "@/components/ui/button"
-import { UserPlus } from "lucide-react"
+import { UserPlus, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,27 +15,59 @@ import { ProfessorForm } from "../professor/Professor-form"
 
 interface ProfessorDialogProps {
   formData: Professor
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleSubmit: (e: React.FormEvent) => void
+  handleSubmit: (professor: Professor) => void
   isLoading: boolean
+  mode?: 'create' | 'edit'
+  trigger?: React.ReactNode
 }
 
-export function ProfessorDialog({ formData, handleChange, handleSubmit, isLoading }: ProfessorDialogProps) {
+export function ProfessorDialog({ 
+  formData: initialFormData, 
+  handleSubmit, 
+  isLoading, 
+  mode = 'create',
+  trigger 
+}: ProfessorDialogProps) {
   const [open, setOpen] = useState(false)
+  const [formData, setFormData] = useState(initialFormData)
+
+  useEffect(() => {
+    setFormData(initialFormData)
+  }, [initialFormData])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await handleSubmit(e)
-    setOpen(false) // Fecha o dialog após o envio bem-sucedido
+    await handleSubmit(formData)
+    setOpen(false)
   }
+
+  const defaultTrigger = (
+    <Button className="gap-2">
+      {mode === 'create' ? (
+        <>
+          <UserPlus size={18} />
+          Adicionar Professor
+        </>
+      ) : (
+        <>
+          <Pencil size={18} />
+          <span className="sr-only">Editar</span>
+        </>
+      )}
+    </Button>
+  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <UserPlus size={18} />
-          Adicionar Professor
-        </Button>
+        {trigger || defaultTrigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <div className="py-4">
@@ -44,6 +76,7 @@ export function ProfessorDialog({ formData, handleChange, handleSubmit, isLoadin
             handleChange={handleChange}
             handleSubmit={onSubmit}
             isLoading={isLoading}
+            mode={mode}
           />
         </div>
       </DialogContent>

@@ -7,24 +7,39 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { UserPlus } from "lucide-react"
+import { Pencil, UserPlus } from "lucide-react"
 
 interface ProfessorFormProps {
   formData: Professor
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleSubmit: (e: React.FormEvent) => void
   isLoading: boolean
+  mode?: 'create' | 'edit'
 }
 
-export function ProfessorForm({ formData, handleChange, handleSubmit, isLoading }: ProfessorFormProps) {
+export function ProfessorForm({ formData, handleChange, handleSubmit, isLoading, mode = 'create' }: ProfessorFormProps) {
   return (
     <Card className="shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserPlus size={20} />
-          Novo Professor
+          {mode === 'create' ? (
+            <>
+              <UserPlus size={20} />
+              Novo Professor
+            </>
+          ) : (
+            <>
+              <Pencil size={20} />
+              Editar Professor
+            </>
+          )}
         </CardTitle>
-        <CardDescription>Preencha os dados para cadastrar um novo professor</CardDescription>
+        <CardDescription>
+          {mode === 'create' 
+            ? 'Preencha os dados para cadastrar um novo professor'
+            : 'Atualize os dados do professor'
+          }
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +105,7 @@ export function ProfessorForm({ formData, handleChange, handleSubmit, isLoading 
           </div>
 
           <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-            {isLoading ? "Cadastrando..." : "Cadastrar Professor"}
+            {isLoading ? "Salvando..." : mode === 'create' ? "Cadastrar Professor" : "Salvar Alterações"}
           </Button>
         </form>
       </CardContent>
